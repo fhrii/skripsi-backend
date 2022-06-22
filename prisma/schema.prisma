@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Fruit {
+  id Int @id @default(autoincrement())
+  slug String @unique
+  name String
+  scientificName String @unique
+  description String @db.Text
+  images Image[]
+}
+
+model Image {
+  id Int @id @default(autoincrement())
+  url String @db.VarChar(255)
+  fruit Fruit @relation(fields: [fruitId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fruitId Int
+}
