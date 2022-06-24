@@ -9,6 +9,7 @@ import * as FormData from 'form-data';
 import { DetectedFruit } from '@/common/type/detected_fruit.type';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { Fruit } from '@prisma/client';
 
 @Injectable()
 export class DetectorService {
@@ -48,7 +49,23 @@ export class DetectorService {
 
       filteredFruit.shift();
 
-      return { fruit: mainFruit, otherFruits: filteredFruit };
+      let otherFruits: Fruit[] = [];
+
+      if (filteredFruit.length > 0) {
+        otherFruits = await this.prismaService.fruit.findMany({
+          where: {
+            slug: { in: filteredFruit },
+          },
+          include: {
+            images: true,
+          },
+        });
+      }
+
+      return {
+        fruit: mainFruit,
+        similiarFruits: otherFruits,
+      };
     } else {
       throw new BadRequestException();
     }
